@@ -13,7 +13,7 @@ ys = []
 vs = []
 ts = []
 
-with open("Providence_Pokemon_1.csv", "r") as f:
+with open("rand.csv", "r") as f:
   for line in f:
     x, y, v, t = map(int, line.split(","))
     xs.append(x)
@@ -21,12 +21,7 @@ with open("Providence_Pokemon_1.csv", "r") as f:
     vs.append(v)
     ts.append(t)
 
-dists = 0.0
+dists = [0 for x in range(41)]
 n = len(xs)
 for i in range(n - 1):
   d = dist(xs[i], ys[i], xs[i + 1], ys[i + 1])
-  dists += d
-print dists / (n - 1)
-
-
-

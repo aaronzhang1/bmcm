@@ -1,12 +1,12 @@
-import numpy as np
-import matplotlib.mlab as mlab
-import matplotlib.pyplot as plt
-
 import random
 import math
 
-T_MAX = 42 * 24 * 60
+T_MAX = 12 * 60
+counts = [410, 333, 271, 198, 165, 150, 91, 80, 48, 53, 51, 44, 23, 23, 22, 11, 11, 4, 4, 7]
+sum_counts = sum(counts)
+freqs = map(lambda x: 1.0 * x / sum_counts, counts)
 
+# Generates random data for T_MAX minutes
 def rand():
   xs = []
   ys = []
@@ -18,8 +18,7 @@ def rand():
     if random.randint(1, 30) == 1:
       x = random.randint(1, 10)
       y = random.randint(1, 10)
-      v = int(min(math.ceil(np.random.exponential(4)), 20))
-      print v
+      v = rand_value()
       if first:
         t = 0
         first = False
@@ -30,34 +29,21 @@ def rand():
     t += 1
   return xs, ys, vs, ts
 
-def dist(x1, y1, x2, y2):
-  return abs(x1 - x2) + abs(y1 - y2)
+# Random Pokemon value using distribution from test data
+def rand_value():
+  r = random.random()
+  for i in range(20):
+    if r < freqs[i]:
+      return i + 1
+    r -= freqs[i]
 
-if __name__ == "__main__":
-  trials = 10
-  sum_dists = 0.0
-  for j in range(trials):
-    dists = 0.0
+# Saves random data to file
+def rand_file(filename):
+  with open(filename, "w") as f:
     xs, ys, vs, ts = rand()
     n = len(xs)
-    for i in range(n - 1):
-      d = dist(xs[i], ys[i], xs[i + 1], ys[i + 1])
-      dists += d
-    sum_dists += dists / (n - 1)
-  print sum_dists / trials
+    for i in range(n):
+      f.write(",".join(map(str, (xs[i], ys[i], vs[i], ts[i]))) + "\n")
 
-'''
-with open("rand.csv", "w") as f:
-  t = 0
-  first = True
-  while t <= T_MAX:
-    if random.randint(1, 30) == 1:
-      x = random.randint(1, 10)
-      y = random.randint(1, 10)
-      v = 1
-      if first:
-        t = 0
-        first = False
-      f.write(",".join(map(str, (x, y, v, t))) + "\n")
-    t += 1
-'''
+if __name__ == "__main__":
+  rand_file("rand.csv")

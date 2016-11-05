@@ -1,9 +1,11 @@
+import rand
+
 import math
 import itertools
+import numpy as np
+import matplotlib.mlab as mlab
+import matplotlib.pyplot as plt
 
-T_MAX = 42 * 24 * 60
-
-# TODO
 # Right now this only works if either (x1, y1) or (x2, y2) is a grid point (both coordinates are integers)
 # (Although in all usages in the code so far, indeed either the start or destination is a grid point)
 def dist(x1, y1, x2, y2):
@@ -20,8 +22,8 @@ class Simulator(object):
 
   def __init__(self):
     # Start near middle of grid
-    self.x = 5
-    self.y = 5
+    self.x = 3
+    self.y = 8
     # Value of all pokemon caught
     self.v = 0
     # Current time
@@ -30,6 +32,7 @@ class Simulator(object):
     # Pokemon to try to catch
     # List of tuples (poke_x, poke_y, poke_v, poke_remaining_time)
     self.goals = []
+    self.hotspot = (3, 8, 0, 1e309)
 
   # A new pokemon appears
   def poke(self, poke_x, poke_y, poke_v, poke_t):
@@ -44,10 +47,12 @@ class Simulator(object):
   def update_goals(self, poke_x, poke_y, poke_v):
     if time_to(self.x, self.y, poke_x, poke_y, self.speed) <= 15:
       poke = (poke_x, poke_y, poke_v, 15)
+      if self.hotspot in self.goals:
+        self.goals.remove(self.hotspot)
       n = len(self.goals)
+      # Brute force search for best way to rearrange list of goals
       best_value = -1
       best_goals = None
-      # Brute force search for best way to rearrange list of goals
       self.goals.append(poke)
       for order in itertools.permutations(self.goals):
         value = self.value_goals(list(order))
@@ -76,10 +81,14 @@ class Simulator(object):
 
   # Simulate until time t
   def sim_until(self, t):
-    # If no pokemon in range, do nothing
+    # If no pokemon in range, go to hotspot
     if not self.goals:
-      self.t = t
-      return
+      if (self.x, self.y) != self.hotspot[:2]:
+        self.goals.append(self.hotspot)
+        self.sim_until(t)
+      else:
+        self.t = t
+        return
     time_left = t - self.t
     if time_left <= 0:
       self.t = t
@@ -239,28 +248,35 @@ class Simulator(object):
     else:
       self.x -= time_left * self.speed
 
-if __name__ == "__main__":
+# Generates random data and runs simulation, returning number of points
+def sim_rand():
+  xs, ys, vs, ts = rand.rand()
+  n = len(xs)
   sim = Simulator()
-  with open("Providence_Pokemon_1.csv", "r") as f:
+  for i in range(n):
+    sim.poke(xs[i], ys[i], vs[i], ts[i])
+  sim.end(rand.T_MAX)
+  return sim.v
+
+# Uses data from file, returning number of points
+def sim_file(filename):
+  sim = Simulator()
+  with open(filename, "r") as f:
     for line in f:
       x, y, v, t = map(int, line.split(","))
       sim.poke(x, y, v, t)
-  sim.end(T_MAX)
-  print sim.v
+  sim.end(rand.T_MAX)
+  return sim.v
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+if __name__ == "__main__":
+  '''
+  trials = 1000
+  results = [0 for i in range(trials)]
+  for i in range(trials):
+    result = sim_rand()
+    results[i] = result
+  print results
+  print np.mean(results)
+  print np.std(results)
+  '''
+  print sim_file("Providence_Pokemon_1.csv");
