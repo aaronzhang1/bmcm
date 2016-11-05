@@ -4,7 +4,8 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 
-T_MAX = 42 * 24 * 60
+# How long to generate random data (in minutes)
+T_MAX = 12 * 60
 
 # Distribution of locations and values
 num_poke = 0

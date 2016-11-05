@@ -275,7 +275,7 @@ def sim_file(filename):
 
 if __name__ == "__main__":
   # Simulate on random data
-  trials = 100
+  trials = 1000
   results = [0 for i in range(trials)]
   for i in range(trials):
     result = sim_rand()
@@ -283,5 +283,5 @@ if __name__ == "__main__":
   print results
   print np.mean(results)
   print np.std(results)
-  # Simulate on test data
+  # Simulate on test data (42 days)
   print sim_file("Providence_Pokemon_1.csv")
