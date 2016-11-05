@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 def dist(x1, y1, x2, y2):
   return abs(x1 - x2) + abs(y1 - y2)
 
+
 xs = []
 ys = []
 vs = []
@@ -26,3 +27,6 @@ for i in range(n - 1):
   d = dist(xs[i], ys[i], xs[i + 1], ys[i + 1])
   dists += d
 print dists / (n - 1)
+
+
+
