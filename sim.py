@@ -6,22 +6,25 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 
-# Right now this only works if either (x1, y1) or (x2, y2) is a grid point (both coordinates are integers)
-# (Although in all usages in the code so far, indeed either the start or destination is a grid point)
+# One of (x1, y1) or (x2, y2) must be a grid point (have both integer coordinates)
 def dist(x1, y1, x2, y2):
   return abs(x1 - x2) + abs(y1 - y2)
 
+# Time to reach the destination traveling at the given speed
 def time_to(x1, y1, x2, y2, speed):
   d = dist(x1, y1, x2, y2)
   return d / speed
 
-def dist_to_edge(x, y):
-  return min(x - 1, 10 - x, y - 1, 10 - y)
+# When there are multiple paths to some destination, each cell along the path
+# is given a score representing how "favorable" it is. Generally, this means
+# that we try to follow paths that have a greater chance of being near Pokemon.
+def score(x, y):
+  return 10 - abs(x - y)
 
 class Simulator(object):
 
   def __init__(self):
-    # Start near middle of grid
+    # Start at hotspot
     self.x = 3
     self.y = 8
     # Value of all pokemon caught
@@ -32,6 +35,7 @@ class Simulator(object):
     # Pokemon to try to catch
     # List of tuples (poke_x, poke_y, poke_v, poke_remaining_time)
     self.goals = []
+    # The hotspot is a "dummy" pokemon with value 0
     self.hotspot = (3, 8, 0, 1e309)
 
   # A new pokemon appears
@@ -89,6 +93,7 @@ class Simulator(object):
       else:
         self.t = t
         return
+
     time_left = t - self.t
     if time_left <= 0:
       self.t = t
@@ -182,36 +187,36 @@ class Simulator(object):
       down = self.y > goal[1]
       right = self.x < goal[0]
       left = self.x > goal[0]
-      up_dist = dist_to_edge(self.x, self.y + 1)
-      down_dist = dist_to_edge(self.x, self.y - 1)
-      right_dist = dist_to_edge(self.x + 1, self.y)
-      left_dist = dist_to_edge(self.x - 1, self.y)
-      # Decide which direction to go next, trying to stay away from edges if possible
+      up_score = score(self.x, self.y + 1)
+      down_score = score(self.x, self.y - 1)
+      right_score = score(self.x + 1, self.y)
+      left_score = score(self.x - 1, self.y)
+      # Decide which direction to go next
       if up:
-        if right and right_dist > up_dist:
+        if right and right_score > up_score:
           self.right(time_left, time_per_block)
-        elif left and left_dist > up_dist:
+        elif left and left_score > up_score:
           self.left(time_left, time_per_block)
         else:
           self.up(time_left, time_per_block)
       elif down:
-        if right and right_dist > down_dist:
+        if right and right_score > down_score:
           self.right(time_left, time_per_block)
-        elif left and left_dist > down_dist:
+        elif left and left_score > down_score:
           self.left(time_left, time_per_block)
         else:
           self.down(time_left, time_per_block)
       elif right:
-        if up and up_dist > right_dist:
+        if up and up_score > right_score:
           self.up(time_left, time_per_block)
-        elif down and down_dist > right_dist:
+        elif down and down_score > right_score:
           self.down(time_left, time_per_block)
         else:
           self.right(time_left, time_per_block)
       else:
-        if up and up_dist > left_dist:
+        if up and up_score > left_score:
           self.up(time_left, time_per_block)
-        elif down and down_dist > left_dist:
+        elif down and down_score > left_score:
           self.down(time_left, time_per_block)
         else:
           self.left(time_left, time_per_block)
@@ -269,8 +274,8 @@ def sim_file(filename):
   return sim.v
 
 if __name__ == "__main__":
-  '''
-  trials = 1000
+  # Simulate on random data
+  trials = 100
   results = [0 for i in range(trials)]
   for i in range(trials):
     result = sim_rand()
@@ -278,5 +283,5 @@ if __name__ == "__main__":
   print results
   print np.mean(results)
   print np.std(results)
-  '''
-  print sim_file("Providence_Pokemon_1.csv");
+  # Simulate on test data
+  print sim_file("Providence_Pokemon_1.csv")
