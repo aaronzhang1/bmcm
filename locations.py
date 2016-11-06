@@ -15,7 +15,7 @@ def plotAppearancesPerLocation():
 	plt.clf() # clear the current figure
 	
 	plt.imshow(heatmap.T, extent=extent, origin='lower', interpolation='none')
-	plt.title("Pokemon Appearances Per Location")
+	plt.title("Pokemon Appearances Per Location (n = " + str(len(xs)) + ")")
 	plt.colorbar()
 
 	plt.show()
@@ -28,7 +28,7 @@ def plotWeightedAppearancesPerLocation():
 	plt.clf() # clear the current figure
 	
 	plt.imshow(heatmap.T, extent=extent, origin='lower', interpolation='none')
-	plt.title("Pokemon Weighted Appearances Per Location")
+	plt.title("Poke Value Per Location (n = " + str(len(xs)) + ")")
 	plt.colorbar()
 
 	plt.show()
@@ -81,11 +81,36 @@ def plotExpectedValueSums(normalized, weighted, currRange):
 	plt.imshow(expectedValueMap.T, extent=[1,10,1,10], origin='lower', interpolation='none')
 	plt.colorbar()
 
-	Title = "Expected Poke Value per Location (Range: " + str(currRange) + ")"
+	Title = "Total Poke Value per Location (Range: " + str(currRange) + ", n: " + str(len(xs)) +  ")"
 	plt.title(Title)
 	plt.show()
 			
 
+def plotAvgValuePerLocation():
+	sumPointsPerSquare = getExpectedValuePerSquare(False, True)
+	sumAppearancesPerSquare = getExpectedValuePerSquare(False, False)
+
+	avgPointsPerAppearance = [points / appearances for points,appearances in zip(sumPointsPerSquare, sumAppearancesPerSquare)]
+
+	plt.imshow(avgPointsPerAppearance, extent=[1,10,1,10], origin='lower', interpolation='none', vmin=0, vmax=20)
+	plt.colorbar()
+
+	Title = "Avg Value of Pokemon Per Location (n = " + str(len(xs)) + ")"
+	plt.title(Title)
+	plt.show()
+
+def plotAvgValuePerLocationWithRange(currRange):
+	sumPointsPerSquare = getTotalExpectedValueForSquaresInRange(False, True, currRange)
+	sumAppearancesPerSquare = getTotalExpectedValueForSquaresInRange(False, False, currRange)
+
+	avgPointsPerAppearance = [points / appearances for points,appearances in zip(sumPointsPerSquare, sumAppearancesPerSquare)]
+
+	plt.imshow(avgPointsPerAppearance, extent=[1,10,1,10], origin='lower', interpolation='none', vmin=0, vmax=20)
+	plt.colorbar()
+
+	Title = "Avg Poke Value per Location (Range: " + str(currRange) + ")"
+	plt.title(Title)
+	plt.show()
 
 
 
@@ -102,6 +127,8 @@ with open("Providence_Pokemon_1.csv", "r") as f:
     ys.append(y)
     vs.append(v)
     ts.append(t)
+
+plotExpectedValueSums(False, True, 2)
 
 
 
